@@ -87,64 +87,171 @@ def plt_show(data, num=1, color=['red']):
         # ax.plot(data[i][0], data[i][1], data[i][2], color=color[i])
     plt.show()
 
-def plt_show_plotly(data, num=1, color=['red'], size=5, rotate_data_whose_y_up=False, title='3D Image Show'):
-    """
-    Hiển thị dữ liệu 3D sử dụng plotly với kích thước ký tự điều chỉnh và tỷ lệ trục bằng nhau,
-    thêm chữ 'end' tại điểm cuối cùng của mỗi tập dữ liệu.
+# def plt_show_plotly(data, num=1, color=['red'], size=5, rotate_data_whose_y_up=False, title='3D Image Show'):
+#     """
+#     Hiển thị dữ liệu 3D sử dụng plotly với kích thước ký tự điều chỉnh và tỷ lệ trục bằng nhau,
+#     thêm chữ 'end' tại điểm cuối cùng của mỗi tập dữ liệu.
     
+#     Args:
+#         data: Danh sách chứa các mảng dữ liệu 3D, mỗi mảng có dạng (n, 3).
+#         num: Số lượng tập dữ liệu cần hiển thị.
+#         color: Danh sách màu sắc cho các tập dữ liệu.
+#         size: Kích thước của các ký tự tròn (mặc định là 5).
+#     """
+#     fig = go.Figure()
+    
+#     # convert all data to numpy array
+#     data = [np.array(d_i) for d_i in data]
+#     for i in range(num):
+#         # Nếu cần xoay dữ liệu
+#         if rotate_data_whose_y_up:
+#             temp = data[i][:, 1].copy()  # Sao chép cột thứ 2
+#             data[i][:, 1] = - data[i][:, 2]  # Gán cột thứ 3 vào cột thứ 2
+#             data[i][:, 2] = temp  # Gán giá trị sao chép vào cột thứ 3
+        
+#         # Thêm dữ liệu chính
+#         fig.add_trace(go.Scatter3d(
+#             x=data[i][:, 0],
+#             y=data[i][:, 1],
+#             z=data[i][:, 2],
+#             mode='markers',
+#             marker=dict(
+#                 size=size,  # Kích thước ký tự
+#                 color=color[i],  # Màu sắc
+#                 opacity=0.8
+#             ),
+#             name=f'Data {i+1}'
+#         ))
+        
+#         # Thêm chữ 'end' tại điểm cuối cùng
+#         end_point = data[i][-1]
+#         fig.add_trace(go.Scatter3d(
+#             x=[end_point[0]],
+#             y=[end_point[1]],
+#             z=[end_point[2]],
+#             mode='text',
+#             text=['end'],  # Nội dung chữ hiển thị
+#             textposition="top center",
+#             name=f'End of Data {i+1}'
+#         ))
+    
+#     # Cập nhật layout
+#     fig.update_layout(
+#         title=title,
+#         scene=dict(
+#             xaxis_title='X',
+#             yaxis_title='Y',
+#             zaxis_title='Z',
+#             aspectmode='cube'  # Đảm bảo tỷ lệ trục bằng nhau
+#         )
+#     )
+    
+#     # Hiển thị
+#     fig.show()
+
+def plt_show_plotly(ground_truth, prediction, color_gt='red', color_pred='blue', size=5, rotate_data_whose_y_up=False, title='3D Trajectory Comparison'):
+    """
+    Hiển thị quỹ đạo 3D với ground truth và prediction, tính toán và hiển thị lỗi giữa hai điểm cuối.
+
     Args:
-        data: Danh sách chứa các mảng dữ liệu 3D, mỗi mảng có dạng (n, 3).
-        num: Số lượng tập dữ liệu cần hiển thị.
-        color: Danh sách màu sắc cho các tập dữ liệu.
-        size: Kích thước của các ký tự tròn (mặc định là 5).
+        ground_truth: Mảng numpy (n, 9) chứa quỹ đạo ground truth với các cột: x, y, z, vx, vy, vz, ax, ay, az.
+        prediction: Mảng numpy (m, 9) chứa quỹ đạo prediction với các cột: x, y, z, vx, vy, vz, ax, ay, az.
+        color_gt: Màu sắc cho quỹ đạo ground truth (mặc định là 'red').
+        color_pred: Màu sắc cho quỹ đạo prediction (mặc định là 'blue').
+        size: Kích thước các ký tự hiển thị (mặc định là 5).
+        rotate_data_whose_y_up: Nếu True, xoay dữ liệu để trục Y hướng lên trên.
     """
+    # Xử lý xoay dữ liệu nếu cần
+    if rotate_data_whose_y_up:
+        ground_truth = ground_truth.copy()
+        prediction = prediction.copy()
+
+        temp_gt = ground_truth[:, 1].copy()
+        ground_truth[:, 1] = -ground_truth[:, 2]
+        ground_truth[:, 2] = temp_gt
+
+        temp_pred = prediction[:, 1].copy()
+        prediction[:, 1] = -prediction[:, 2]
+        prediction[:, 2] = temp_pred
+
     fig = go.Figure()
-    
-    # convert all data to numpy array
-    data = [np.array(d_i) for d_i in data]
-    for i in range(num):
-        # Nếu cần xoay dữ liệu
-        if rotate_data_whose_y_up:
-            temp = data[i][:, 1].copy()  # Sao chép cột thứ 2
-            data[i][:, 1] = - data[i][:, 2]  # Gán cột thứ 3 vào cột thứ 2
-            data[i][:, 2] = temp  # Gán giá trị sao chép vào cột thứ 3
-        
-        # Thêm dữ liệu chính
-        fig.add_trace(go.Scatter3d(
-            x=data[i][:, 0],
-            y=data[i][:, 1],
-            z=data[i][:, 2],
-            mode='markers',
-            marker=dict(
-                size=size,  # Kích thước ký tự
-                color=color[i],  # Màu sắc
-                opacity=0.8
-            ),
-            name=f'Data {i+1}'
-        ))
-        
-        # Thêm chữ 'end' tại điểm cuối cùng
-        end_point = data[i][-1]
-        fig.add_trace(go.Scatter3d(
-            x=[end_point[0]],
-            y=[end_point[1]],
-            z=[end_point[2]],
-            mode='text',
-            text=['end'],  # Nội dung chữ hiển thị
-            textposition="top center",
-            name=f'End of Data {i+1}'
-        ))
-    
+
+    # Vẽ ground truth
+    fig.add_trace(go.Scatter3d(
+        x=ground_truth[:, 0],
+        y=ground_truth[:, 1],
+        z=ground_truth[:, 2],
+        mode='markers',
+        marker=dict(
+            size=size,
+            color=color_gt,
+            symbol='circle',
+            opacity=0.8
+        ),
+        name='Ground Truth'
+    ))
+
+    # Vẽ prediction
+    fig.add_trace(go.Scatter3d(
+        x=prediction[:, 0],
+        y=prediction[:, 1],
+        z=prediction[:, 2],
+        mode='markers',
+        marker=dict(
+            size=size,
+            color=color_pred,
+            symbol='cross',
+            opacity=0.8
+        ),
+        name='Prediction'
+    ))
+
+    # Tính toán khoảng cách lỗi giữa hai điểm cuối
+    gt_end = ground_truth[-1, :3]  # Lấy x, y, z của điểm cuối ground truth
+    pred_end = prediction[-1, :3]  # Lấy x, y, z của điểm cuối prediction
+    distance = np.linalg.norm(gt_end - pred_end)
+
+    # Vẽ đường nối hai điểm cuối bằng đường đứt đoạn
+    fig.add_trace(go.Scatter3d(
+        x=[gt_end[0], pred_end[0]],
+        y=[gt_end[1], pred_end[1]],
+        z=[gt_end[2], pred_end[2]],
+        mode='lines',
+        line=dict(
+            color='black',
+            dash='dash'
+        ),
+        name='Error Line'
+    ))
+
+    # Hiển thị lỗi dưới dạng text gần đường nối
+    midpoint = (gt_end + pred_end) / 2  # Tính điểm giữa để hiển thị text
+    fig.add_trace(go.Scatter3d(
+        x=[midpoint[0]],
+        y=[midpoint[1]],
+        z=[midpoint[2]],
+        mode='text',
+        text=[f'err={distance:.2f}'],
+        textposition="top center",
+        name='Error Text'
+    ))
+
     # Cập nhật layout
     fig.update_layout(
-        title=title,
+        title={
+            'text': f'3D Trajectory Comparison: Prediction Length = {len(prediction)}, Error = {distance:.2f}',
+            'x': 0.5,
+            'xanchor': 'center',
+            'yanchor': 'top',
+            'font': dict(size=35)
+        },
         scene=dict(
             xaxis_title='X',
             yaxis_title='Y',
             zaxis_title='Z',
-            aspectmode='cube'  # Đảm bảo tỷ lệ trục bằng nhau
+            aspectmode='cube'
         )
     )
-    
-    # Hiển thị
+
+    # Hiển thị biểu đồ
     fig.show()

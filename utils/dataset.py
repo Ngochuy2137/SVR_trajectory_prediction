@@ -30,7 +30,9 @@ def load_data(data_dir, dms_idx):
 
 
 def load_npz(dir, traj_name):
-    raw_data = np.load(dir + "/" + traj_name)
+    dir = dir + "/" + traj_name
+    print("dir", dir); input()
+    raw_data = np.load(dir)
     obj = raw_data['position']
     return obj
 

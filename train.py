@@ -26,7 +26,7 @@ param_grid = {
 
 dms_num = 3 # only pos
 OBJECT_NAME = "trimmed_Bottle_115"
-DATA_FOLDER_PARENT = f'/home/server-huynn/workspace/robot_catching_project/trajectory_prediction/nae_fix_dismiss_acc/trajectory-prediction-SVR/data/{OBJECT_NAME}/training_data'
+DATA_DIR = f'/home/server-huynn/workspace/robot_catching_project/trajectory_prediction/trajectory-prediction-SVR/data/{OBJECT_NAME}/training_data'
 # SPLINE_TYPE = 'cubic'
 SPLINE_TYPE = 'univariate-k3-s0'
 '''
@@ -45,19 +45,18 @@ Huấn luyện mô hình SVR dựa trên dữ liệu vị trí và lưu mô hìn
         dms_idx: Chỉ số của thành phần động học (x, y, hoặc z).
         object_name: Tên đối tượng (ví dụ: 'boomerang').
 '''
-def train_pos(dms_idx, object_name):
+def train_pos(dms_idx):
     # traj_dir = f"npz_aug_scp/{object_name}/train_q"
-    traj_dir = f'{DATA_FOLDER_PARENT}'
-    traj_list = os.listdir(traj_dir)
+    traj_list = os.listdir(DATA_DIR)
     model = SVR(kernel='rbf')
     X = [] # zeta = {[x; v]}
     y = [] # Y = {a}
     count = 0
-    for i,traj_name in enumerate(traj_list):
+    for i,traj_npz_name in enumerate(traj_list):
         # choose the raw data
         # Chỉ chọn dữ liệu ở mỗi bước thứ 20 để giảm tải
         if (i+1) % 20 == 0:
-            traj_data = load_npz(traj_dir, traj_name)       # shape (time_steps, 3)
+            traj_data = load_npz(DATA_DIR, traj_npz_name)       # shape (time_steps, 3)
             xva = cubic_speed(traj_data, SPLINE_TYPE)                    # shape ((x, v, a), 3, time_steps)
 
 
@@ -102,22 +101,21 @@ def train_pos(dms_idx, object_name):
     model.fit(X, y)
 
     # Lưu mô hình đã huấn luyện
-    model_path = f"{save_path}/{object_name}_{dms_idx}.pkl"
+    model_path = f"{save_path}/{OBJECT_NAME}_{dms_idx}.pkl"
     joblib.dump(model, model_path)
     # Ghi các tham số tối ưu vào file params.txt để tham khảo sau này
     param_f = open(f"{save_path}/params.txt", "a")
-    param_f.write(f"{object_name}_{dms_idx}: C:{best_parameters['C']} gamma:{best_parameters['gamma']}\n")
+    param_f.write(f"{OBJECT_NAME}_{dms_idx}: C:{best_parameters['C']} gamma:{best_parameters['gamma']}\n")
     param_f.close()
-    global_util_printer.print_green(f"Model {object_name}_{dms_idx} was saved to {model_path}")
+    global_util_printer.print_green(f"Model {OBJECT_NAME}_{dms_idx} was saved to {model_path}")
 
 
 if __name__ == '__main__':
-    for j in [OBJECT_NAME]:
-        '''
-        Với mỗi dữ liệu trajectory, huấn luyện mô hình SVR cho để dự đoán cho từng giá trị gia tốc theo trục x, y, z
-        i = 0 -> x
-        i = 1 -> y
-        i = 2 -> z
-        '''
-        for i in range(dms_num):
-            train_pos(i, j)
+    '''
+    Với mỗi dữ liệu trajectory, huấn luyện mô hình SVR cho để dự đoán cho từng giá trị gia tốc theo trục x, y, z
+    i = 0 -> x
+    i = 1 -> y
+    i = 2 -> z
+    '''
+    for i in range(dms_num):
+        train_pos(i)

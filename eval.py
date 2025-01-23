@@ -19,9 +19,9 @@ global_util_plotter = Plotter()
 
 
 OBJECT_NAME = 'trimmed_Bottle_115'          # "trimmed_Bottle_115"
-DATA_TEST_DIR = f'/home/server-huynn/workspace/robot_catching_project/trajectory_prediction/nae_fix_dismiss_acc/trajectory-prediction-SVR/data/{OBJECT_NAME}/testing_data'
+DATA_TEST_DIR = f'/home/server-huynn/workspace/robot_catching_project/trajectory_prediction/trajectory-prediction-SVR/data/{OBJECT_NAME}/testing_data'
 # MODEL_DIR = f'/home/server-huynn/workspace/robot_catching_project/trajectory_prediction/nae_fix_dismiss_acc/trajectory-prediction-SVR/model/{OBJECT_NAME}'
-MODEL_DIR = '/home/server-huynn/workspace/robot_catching_project/trajectory_prediction/nae_fix_dismiss_acc/trajectory-prediction-SVR/model/trimmed_Bottle_115_cubic'
+MODEL_DIR = '/home/server-huynn/workspace/robot_catching_project/trajectory_prediction/trajectory-prediction-SVR/model/trimmed_Bottle_115'
 # SPLINE_TYPE = 'cubic'
 SPLINE_TYPE = 'univariate-k3-s0'
 '''
@@ -121,7 +121,18 @@ def eval_position(traj_name, t_now=None, show_plt=False):
     
     if show_plt:
         # PLOT pos
-        plt_show_plotly([pos_raw_seq, pos_pred_seq], num=2, color=['red', 'green'], rotate_data_whose_y_up=True)
+        # plt_show_plotly([pos_raw_seq, pos_pred_seq], num=2, color=['red', 'green'], rotate_data_whose_y_up=True)
+        # convert to numpy array
+        pos_raw_seq = np.array(pos_raw_seq)
+        pos_pred_seq = np.array(pos_pred_seq)
+
+        if len(pos_pred_seq)%10==0:
+            plt_show_plotly(ground_truth=pos_raw_seq, prediction=pos_pred_seq, color_gt='red', color_pred='blue', size=5, rotate_data_whose_y_up=True)
+            input()
+        # input(str(len(pos_pred_seq)))
+
+        
+
         # PLOT acc
         # pred_accs = np.array(pred_accs)
         # # swap shape from (time_steps, 3) to (3, time_steps)
@@ -131,7 +142,6 @@ def eval_position(traj_name, t_now=None, show_plt=False):
         #                                 title=f'111111 Acceleration - {OBJECT_NAME}', \
         #                                 x_label='Time step', y_label='Acceleration x', \
         #                                 legends=['acc_x', 'acc_y', 'acc_z'])
-        input()
        
     return pos_err, acc_err, traj_long
 
@@ -166,7 +176,7 @@ if __name__ == '__main__':
         end_traj = False
         while(pos_err > 0.01 and T < traj_long-1):
             T += 1
-            pos_err, _, traj_long = eval_position(traj_name, T, show_plt=False)
+            pos_err, _, traj_long = eval_position(traj_name, T, show_plt=True)
             print('         pos_err:', pos_err)
             if pos_err < 0.01:
                 good_pos_err = True
