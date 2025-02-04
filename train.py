@@ -73,9 +73,9 @@ class SVRTrainer:
 
 
     def train_each_axis(self, axis_idx, x_train, y_train):
-        print('X shape:', x_train.shape)  # (11270, 6)
-        print('y shape:', y_train.shape)  # (11270,)
-        input()
+        # print('X shape:', x_train.shape)  # (11270, 6)
+        # print('y shape:', y_train.shape)  # (11270,)
+        # input()
         '''
         1. Khởi tạo mô hình SVR và Grid Search để tìm ra các tham số tốt nhất cho mô hình SVR: C và gamma
         '''
