@@ -2,7 +2,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 import mpl_toolkits.mplot3d
 from scipy.interpolate import UnivariateSpline, CubicSpline
-from scipy.misc import derivative
+# from scipy.misc import derivative
+from scipy.optimize import approx_fprime
 import sys
 import plotly.graph_objects as go
 import re
@@ -30,7 +31,7 @@ def cubic_speed(raw_data, spline_type='univariate-k3-sNone'):
             if match:
                 s_value = None if match.group('s') == 'None' else float(match.group('s'))
                 k_value = int(match.group('k'))
-                print(f"Found 'univariate'. s: {s_value}, k: {k_value}")
+                # print(f"Found 'univariate'. s: {s_value}, k: {k_value}")
                 raw_f = UnivariateSpline(t,x, k=k_value, s=s_value)
                 vec_f = raw_f.derivative(n=1)
                 acc_f = raw_f.derivative(n=2)

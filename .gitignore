@@ -1,10 +1,11 @@
 */__pycache__/
 .vscode/
 */data/*
-*/model/*
+**/model/
 *.log
 *.out
 result*
 *.txt
 *.pkl
+.env
 
